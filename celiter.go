@@ -21,8 +21,10 @@ var (
 // Type is the type of the iterable value. Use this when defining custom
 // CEL functions that handle (or return) iterable values.
 //
-// These values are iterable and indexable, but not map-like.
-var Type = types.DynType.WithTraits(traits.IterableType | traits.IteratorType | traits.IndexerType)
+// These values are iterable, indexable, and have a size.
+var Type = types.DynType.WithTraits(
+	traits.IterableType | traits.IteratorType | traits.IndexerType | traits.SizerType | traits.ContainerType,
+)
 
 // HasNext is a function that checks if there is a next element in the iterable.
 type HasNext func() (bool, error)
@@ -159,6 +161,28 @@ func (v *Value[T]) Get(key ref.Val) ref.Val {
 	}
 
 	return v.convert(v.cur)
+}
+
+// Size returns the size of the iterable value.
+func (v *Value[T]) Size() ref.Val {
+	size := 0
+	for v.HasNext().Value().(bool) {
+		v.Next()
+		size++
+	}
+
+	return types.Int(size)
+}
+
+// Contains checks if the iterable value contains the given value.
+func (v *Value[T]) Contains(val ref.Val) ref.Val {
+	for v.HasNext().Value().(bool) {
+		if v.Next().Equal(val) == types.True {
+			return types.True
+		}
+	}
+
+	return types.False
 }
 
 // FromSeq creates a new iterable Value instance from a sequence of elements,
