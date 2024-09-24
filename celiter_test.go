@@ -59,6 +59,30 @@ func TestNew(t *testing.T) {
 				must.Error(t, err)
 			},
 		},
+		{
+			name: "size expression",
+			expr: "size(values()) == 3",
+			check: func(t *testing.T, val ref.Val, err error) {
+				must.NoError(t, err)
+				must.Eq(t, fmt.Sprintf("%v", val), "true")
+			},
+		},
+		{
+			name: "true in expression",
+			expr: "'test' in values()",
+			check: func(t *testing.T, val ref.Val, err error) {
+				must.NoError(t, err)
+				must.Eq(t, fmt.Sprintf("%v", val), "true")
+			},
+		},
+		{
+			name: "false in expression",
+			expr: "'blah' in values()",
+			check: func(t *testing.T, val ref.Val, err error) {
+				must.NoError(t, err)
+				must.Eq(t, fmt.Sprintf("%v", val), "false")
+			},
+		},
 	}
 
 	for _, test := range tests {
